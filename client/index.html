@@ -1,30 +1,92 @@
-
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To do app</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container" x-data="{ todos: [] }">
-  	<h1>To do app</h1>
-    <ul>
-      <li x-for="todo in todos" :key="todo.id">
-        <input type="checkbox" x-model="todo.completed">
-        {{ todo.text }}
-        <button hx-delete="/todos/{todo.id}">Xóa</button>
-      </li>
-    </ul>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <script defer="" src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.10/dist/cdn.min.js"></script>
+        <title>To do app</title>
+        <link href="style.css" rel="stylesheet"></link>
+        </meta>
+        </meta>
+    </head>
 
-    <form hx-post="/todos" @submit.prevent="addTodo">
-      <input type="text" x-model="newTodoText" placeholder="Thêm mới">
-      <button type="submit">Thêm</button>
-    </form>
-  </div>
+    <body x-data="screen">
+        <div class="container" x-init="initData()">
+	  		<h1>Ứng dụng To do</h1>
+	  		<template x-model="todos">
+	     		<ul x-for="todo in data">
+    				<li>
+    					<span x-text="todo.title"></span>
+	      				<!-- <button x-on:click="deleteTodo(todo.id)">Xóa</button> -->
+    				</li>
+	    		</ul>
 
-  <script src="https://unpkg.com/alpinejs"></script>
-  <script src="index.js"></script>
-</body>
+    			<span x-text="todo"></span>
+  			</template>
+
+	  		<!-- <form hx-post="/todos" @submit.prevent="addTodo">
+	    		<input type="text" x-model="newTodoText" placeholder="Thêm mới">
+	    		<button type="submit">Thêm</button>
+	  		</form> -->
+		</div>
+        <script>
+            document.addEventListener('alpine:init', () => {
+      			Alpine.data('screen', () => ({
+			        API_URL :'https://dummyjson.com/todos',
+			        todos: [],
+			        initData() {
+						fetch(this.API_URL)
+						.then(response => response.json())
+						.then(data=>{
+								if(!data) return;
+								this.todos= data;
+								// console.log(todos);
+								// for(let todo of data.todos) {
+								// 	this.todos = todo;
+								// 	// console.log(todo.todo);
+								// }
+			       		}),
+			       	},	
+			        addTodo() {
+			          	if (this.newTodoText.trim()) {
+				            const newTodo = {
+				              id: Math.random().toString(36).substr(2, 9),
+				              text: this.newTodoText,
+				              completed: false
+				            };
+			            	this.todos.push(newTodo);
+			            	this.newTodoText = '';
+			            	fetch(this.API_URL, {
+			              		method: 'POST',
+			              		headers: {
+			                		'Content-Type': 'application/json'
+			              		},
+			              		body: JSON.stringify(newTodo)
+			            	})
+			            	.then(response => response.json())
+			            	.then(data => {
+			              		this.todos.unshift(data);
+			              		this.newTodoText = '';
+			            	})
+			            	.catch(error => {
+			              		console.error(error);
+			            	});
+			          	}
+			        },
+			        deleteTodo(id) {
+			          	fetch(`${this.API_URL}/${id}`, {
+			            	method: 'DELETE'
+			          	})
+			          	.then(response => response.json())
+			          	.then(data => {
+			            	console.log('Todo deleted');
+			          	})
+			          	.catch(error => {
+			           		console.error(error);
+			         	});
+			        }
+      			}));
+      		});	
+        </script>
+    </body>
 </html>
