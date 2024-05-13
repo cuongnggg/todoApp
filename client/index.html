@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To do app</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container" x-data="{ todos: [] }">
+  	<h1>To do app</h1>
+    <ul>
+      <li x-for="todo in todos" :key="todo.id">
+        <input type="checkbox" x-model="todo.completed">
+        {{ todo.text }}
+        <button hx-delete="/todos/{todo.id}">Xóa</button>
+      </li>
+    </ul>
+
+    <form hx-post="/todos" @submit.prevent="addTodo">
+      <input type="text" x-model="newTodoText" placeholder="Thêm mới">
+      <button type="submit">Thêm</button>
+    </form>
+  </div>
+
+  <script src="https://unpkg.com/alpinejs"></script>
+  <script src="index.js"></script>
+</body>
+</html>
